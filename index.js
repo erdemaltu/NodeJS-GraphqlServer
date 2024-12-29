@@ -101,6 +101,10 @@ const typeDefs = gql`
         event_id: ID
     }
 
+    type DeleteAllOutput {
+        count: Int!
+    }
+
     type Query {
         #user
         users: [User!]!
@@ -121,18 +125,22 @@ const typeDefs = gql`
         createUser(data: createUserInput!): User!
         updateUser(id:ID!,data: UpdateUserInput! ): User!
         deleteUser(id:ID!): User!
+        deleteAllUsers: DeleteAllOutput!
         #event
         createEvent(data: createEventInput!): Event!
         updateEvent(id:ID!,data: UpdateEventInput!): Event!
         deleteEvent(id:ID!): Event!
+        deleteAllEvents: DeleteAllOutput!
         #location
         createLocation(data: createLocationInput!): Location!
         updateLocation(id:ID!,data: UpdateLocationInput!): Location!
         deleteLocation(id:ID!): Location!
+        deleteAllLocations: DeleteAllOutput!
         #participant
         createParticipant(data: createParticipantInput!): Participant!
         updateParticipant(id:ID!,data: UpdateParticipantInput!): Participant!
         deleteParticipant(id:ID!): Participant!
+        deleteAllParticipants: DeleteAllOutput!
     }
 `;
 
@@ -166,6 +174,11 @@ const resolvers = {
       const deletedUser = users.splice(userIndex, 1);
       return deletedUser[0];
     },
+    deleteAllUsers: () => {
+        const count = users.length;
+        users.splice(0, users.length);
+        return { count };
+    },
     //event
     createEvent: (parent, {data }) => {
       const event = {
@@ -193,6 +206,11 @@ const resolvers = {
         }
         const deletedEvent = events.splice(eventIndex, 1);
         return deletedEvent[0];
+    },
+    deleteAllEvents: () => {
+        const count = events.length;
+        events.splice(0, events.length);
+        return { count };
     },
     //location
     createLocation: (parent, {data}) => {
@@ -223,6 +241,11 @@ const resolvers = {
         const deletedLocation = locations.splice(locationIndex, 1);
         return deletedLocation[0];
     },
+    deleteAllLocations: () => {
+        const count = locations.length;
+        locations.splice(0, locations.length);
+        return { count };
+    },
     //participant
     createParticipant: (parent, {data}) => {
       const participant = {
@@ -250,6 +273,11 @@ const resolvers = {
       }
       const deletedParticipant = participants.splice(participantIndex, 1);
       return deletedParticipant[0];
+    },
+    deleteAllParticipants: () => {
+        const count = participants.length;
+        participants.splice(0, participants.length);
+        return { count };
     },
   },
   Query: {
