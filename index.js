@@ -10,121 +10,125 @@ const { events, locations, users, participants } = require("./data.json");
 const { create } = require("ts-node");
 
 const typeDefs = gql`
-  type Event {
-    id: ID!
-    title: String!
-    desc: String!
-    date: String!
-    from: String!
-    to: String!
-    location_id: ID!
-    location: Location!
-    user_id: ID!
-    user: User!
-    participants: [Participant!]!
-  }
+    #User
+    type User {
+        id: ID!
+        username: String!
+        email: String!
+        events: [Event!]!
+    }
+    input createUserInput {
+        username: String!
+        email: String!
+    }
+    #Event
+    type Event {
+        id: ID!
+        title: String!
+        desc: String!
+        date: String!
+        from: String!
+        to: String!
+        location_id: ID!
+        location: Location!
+        user_id: ID!
+        user: User!
+        participants: [Participant!]!
+    }
 
-  type Location {
-    id: ID!
-    name: String!
-    desc: String!
-    lat: String!
-    lng: String!
-    events: [Event!]!
-  }
+    input createEventInput {
+        title: String!
+        desc: String!
+        date: String!
+        from: String!
+        to: String!
+        location_id: ID!
+        user_id: ID!
+    }
 
-  type User {
-    id: ID!
-    username: String!
-    email: String!
-    events: [Event!]!
-  }
+    #Location
+    type Location {
+        id: ID!
+        name: String!
+        desc: String!
+        lat: String!
+        lng: String!
+        events: [Event!]!
+    }
 
-  type Participant {
-    id: ID!
-    user_id: ID!
-    event_id: ID!
-    events: [Event!]!
-  }
+    input createLocationInput {
+        name: String!
+        desc: String!
+        lat: String!
+        lng: String!
+    }
 
-  type Query {
-    #user
-    users: [User!]!
-    user(id: ID!): User!
-    #event
-    events: [Event!]!
-    event(id: ID!): Event!
-    #location
-    locations: [Location!]!
-    location(id: ID!): Location!
-    #participant
-    participants: [Participant!]!
-    participant(id: ID!): Participant!
-  }
+    #Participant
+    type Participant {
+        id: ID!
+        user_id: ID!
+        event_id: ID!
+        events: [Event!]!
+    }
+    input createParticipantInput {
+        user_id: ID!
+        event_id: ID!
+    }
 
-  type Mutation {
-    createUser(username: String!, email: String!): User!
-    createEvent(
-      title: String!
-      desc: String!
-      date: String!
-      from: String!
-      to: String!
-      location_id: ID!
-      user_id: ID!
-    ): Event!
-    createLocation(
-      name: String!
-      desc: String!
-      lat: String!
-      lng: String!
-    ): Location!
-    createParticipant(user_id: ID!, event_id: ID!): Participant!
-  }
+    type Query {
+        #user
+        users: [User!]!
+        user(id: ID!): User!
+        #event
+        events: [Event!]!
+        event(id: ID!): Event!
+        #location
+        locations: [Location!]!
+        location(id: ID!): Location!
+        #participant
+        participants: [Participant!]!
+        participant(id: ID!): Participant!
+    }
+
+    type Mutation {
+        createUser(data: createUserInput!): User!
+        createEvent(data: createEventInput!): Event!
+        createLocation(data: createLocationInput!): Location!
+        createParticipant(data: createParticipantInput!): Participant!
+    }
 `;
 
 const resolvers = {
   Mutation: {
-    createUser: (parent, args) => {
+    createUser: (parent, {data}) => {
       const user = {
         id: nanoid(),
-        username: args.username,
-        email: args.email,
+        ...data,
       };
       users.push(user);
       return user;
     },
-    createEvent: (parent, args) => {
+    createEvent: (parent, {data }) => {
       const event = {
         id: nanoid(),
-        title: args.title,
-        desc: args.desc,
-        date: args.date,
-        from: args.from,
-        to: args.to,
-        location_id: args.location_id,
-        user_id: args.user_id,
+        ...data,
       };
       events.push(event);
       return event;
     },
-    createLocation: (parent, args) => {
+    createLocation: (parent, {data}) => {
       const location = {
         id: nanoid(),
-        name: args.name,
-        desc: args.desc,
-        lat: args.lat,
-        lng: args.lng,
+        ...data,
       };
 
       locations.push(location);
       return location;
     },
-    createParticipant: (parent, args) => {
+    createParticipant: (parent, {data}) => {
       const participant = {
         id: nanoid(),
-        user_id: args.user_id,
-        event_id: args.event_id,
+        ...data,
       };
       participants.push(participant);
       return participant;
