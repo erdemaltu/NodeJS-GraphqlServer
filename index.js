@@ -21,6 +21,11 @@ const typeDefs = gql`
         username: String!
         email: String!
     }
+    input UpdateUserInput {
+        username: String
+        email: String
+    }
+
     #Event
     type Event {
         id: ID!
@@ -46,6 +51,16 @@ const typeDefs = gql`
         user_id: ID!
     }
 
+    input UpdateEventInput {
+        title: String
+        desc: String
+        date: String
+        from: String
+        to: String
+        location_id: ID
+        user_id: ID
+    }
+
     #Location
     type Location {
         id: ID!
@@ -63,6 +78,13 @@ const typeDefs = gql`
         lng: String!
     }
 
+    input UpdateLocationInput {
+        name: String
+        desc: String
+        lat: String
+        lng: String
+    }
+
     #Participant
     type Participant {
         id: ID!
@@ -73,6 +95,10 @@ const typeDefs = gql`
     input createParticipantInput {
         user_id: ID!
         event_id: ID!
+    }
+    input UpdateParticipantInput {
+        user_id: ID
+        event_id: ID
     }
 
     type Query {
@@ -91,15 +117,24 @@ const typeDefs = gql`
     }
 
     type Mutation {
+        #user
         createUser(data: createUserInput!): User!
+        updateUser(id:ID!,data: UpdateUserInput! ): User!
+        #event
         createEvent(data: createEventInput!): Event!
+        updateEvent(id:ID!,data: UpdateEventInput!): Event!
+        #location
         createLocation(data: createLocationInput!): Location!
+        updateLocation(id:ID!,data: UpdateLocationInput!): Location!
+        #participant
         createParticipant(data: createParticipantInput!): Participant!
+        updateParticipant(id:ID!,data: UpdateParticipantInput!): Participant!
     }
 `;
 
 const resolvers = {
   Mutation: {
+    //user
     createUser: (parent, {data}) => {
       const user = {
         id: nanoid(),
@@ -108,6 +143,18 @@ const resolvers = {
       users.push(user);
       return user;
     },
+    updateUser: (parent, {id, data}) => {
+      const userIndex = users.findIndex((user) => user.id == id);
+      if (userIndex == -1) {
+        return new Error("User not found");
+      }
+      users[userIndex] = {
+        ...users[userIndex],
+        ...data,
+      };
+      return users[userIndex];
+    },
+    //event
     createEvent: (parent, {data }) => {
       const event = {
         id: nanoid(),
@@ -116,6 +163,18 @@ const resolvers = {
       events.push(event);
       return event;
     },
+    updateEvent: (parent, {id, data}) => {
+      const eventIndex = events.findIndex((event) => event.id == id);
+      if (eventIndex == -1) {
+        return new Error("Event not found");
+      }
+      events[eventIndex] = {
+        ...events[eventIndex],
+        ...data,
+      };
+      return events[eventIndex];
+    },
+    //location
     createLocation: (parent, {data}) => {
       const location = {
         id: nanoid(),
@@ -125,6 +184,18 @@ const resolvers = {
       locations.push(location);
       return location;
     },
+    updateLocation: (parent, {id, data}) => {
+        const locationIndex = locations.findIndex((location) => location.id == id);
+        if (locationIndex == -1) {
+            return new Error("Location not found");
+        }
+        locations[locationIndex] = {
+            ...locations[locationIndex],
+            ...data,
+        };
+        return locations[locationIndex];
+    },
+    //participant
     createParticipant: (parent, {data}) => {
       const participant = {
         id: nanoid(),
@@ -133,6 +204,17 @@ const resolvers = {
       participants.push(participant);
       return participant;
     },
+    updateParticipant: (parent, {id, data}) => {
+      const participantIndex = participants.findIndex((participant) => participant.id == id);
+      if (participantIndex == -1) {
+        return new Error("Participant not found");
+      }
+      participants[participantIndex] = {
+        ...participants[participantIndex],
+        ...data,
+      };
+      return participants[participantIndex];
+    }
   },
   Query: {
     //user
