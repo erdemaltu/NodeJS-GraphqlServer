@@ -120,15 +120,19 @@ const typeDefs = gql`
         #user
         createUser(data: createUserInput!): User!
         updateUser(id:ID!,data: UpdateUserInput! ): User!
+        deleteUser(id:ID!): User!
         #event
         createEvent(data: createEventInput!): Event!
         updateEvent(id:ID!,data: UpdateEventInput!): Event!
+        deleteEvent(id:ID!): Event!
         #location
         createLocation(data: createLocationInput!): Location!
         updateLocation(id:ID!,data: UpdateLocationInput!): Location!
+        deleteLocation(id:ID!): Location!
         #participant
         createParticipant(data: createParticipantInput!): Participant!
         updateParticipant(id:ID!,data: UpdateParticipantInput!): Participant!
+        deleteParticipant(id:ID!): Participant!
     }
 `;
 
@@ -154,6 +158,14 @@ const resolvers = {
       };
       return users[userIndex];
     },
+    deleteUser: (parent, {id}) => {
+      const userIndex = users.findIndex((user) => user.id == id);
+      if (userIndex == -1) {
+        return new Error("User not found");
+      }
+      const deletedUser = users.splice(userIndex, 1);
+      return deletedUser[0];
+    },
     //event
     createEvent: (parent, {data }) => {
       const event = {
@@ -173,6 +185,14 @@ const resolvers = {
         ...data,
       };
       return events[eventIndex];
+    },
+    deleteEvent: (parent, {id}) => {
+        const eventIndex = events.findIndex((event) => event.id == id);
+        if (eventIndex == -1) {
+            return new Error("Event not found");
+        }
+        const deletedEvent = events.splice(eventIndex, 1);
+        return deletedEvent[0];
     },
     //location
     createLocation: (parent, {data}) => {
@@ -195,6 +215,14 @@ const resolvers = {
         };
         return locations[locationIndex];
     },
+    deleteLocation: (parent, {id}) => {
+        const locationIndex = locations.findIndex((location) => location.id == id);
+        if (locationIndex == -1) {
+            return new Error("Location not found");
+        }
+        const deletedLocation = locations.splice(locationIndex, 1);
+        return deletedLocation[0];
+    },
     //participant
     createParticipant: (parent, {data}) => {
       const participant = {
@@ -214,7 +242,15 @@ const resolvers = {
         ...data,
       };
       return participants[participantIndex];
-    }
+    },
+    deleteParticipant: (parent, {id}) => {
+      const participantIndex = participants.findIndex((participant) => participant.id == id);
+      if (participantIndex == -1) {
+        return new Error("Participant not found");
+      }
+      const deletedParticipant = participants.splice(participantIndex, 1);
+      return deletedParticipant[0];
+    },
   },
   Query: {
     //user
