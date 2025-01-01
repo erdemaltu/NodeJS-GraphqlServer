@@ -146,6 +146,8 @@ const typeDefs = /* GraphQL */ `
 
     type Subscription {
       userCreated: User!
+      userUpdated: User!
+      userDeleted: User!
     }
 `;
 let globalCounter = 0;
@@ -162,6 +164,16 @@ const resolvers = {
       subscribe: (_,__,{pubSub}) => {
         return pubSub.subscribe("userCreated");
       }
+    },
+    userUpdated: {
+      subscribe: (_,__,{pubSub}) => {
+        return pubSub.subscribe("userUpdated");
+      }
+    },
+    userDeleted: {
+      subscribe: (_,__,{pubSub}) => {
+        return pubSub.subscribe("userDeleted");
+      }
     }
   },
   Mutation: {
@@ -175,7 +187,7 @@ const resolvers = {
       pubSub.publish("userCreated", { userCreated: user });
       return user;
     },
-    updateUser: (_, {id, data}) => {
+    updateUser: (_, {id, data}, {pubSub}) => {
       const userIndex = users.findIndex((user) => user.id == id);
       if (userIndex == -1) {
         return new Error("User not found");
@@ -184,14 +196,16 @@ const resolvers = {
         ...users[userIndex],
         ...data,
       };
+      pubSub.publish("userUpdated", { userUpdated: users[userIndex] });
       return users[userIndex];
     },
-    deleteUser: (_, {id}) => {
+    deleteUser: (_, {id}, {pubSub}) => {
       const userIndex = users.findIndex((user) => user.id == id);
       if (userIndex == -1) {
         return new Error("User not found");
       }
       const deletedUser = users.splice(userIndex, 1);
+      pubSub.publish("userDeleted", { userDeleted: deletedUser[0] });
       return deletedUser[0];
     },
     deleteAllUsers: () => {
