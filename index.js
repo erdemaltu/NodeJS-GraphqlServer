@@ -3,6 +3,7 @@ const { createPubSub,
   createSchema,
   createYoga } = require('graphql-yoga')
 
+const pubSub = require('./pubsub');
 let nanoid;
 import("nanoid").then((module) => {
   nanoid = module.nanoid;
@@ -164,8 +165,6 @@ const typeDefs = /* GraphQL */ `
     }
 `;
 let globalCounter = 0;
-
-const pubSub = createPubSub();
 
 const context = {
   pubSub
