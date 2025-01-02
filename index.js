@@ -145,9 +145,22 @@ const typeDefs = /* GraphQL */ `
     }
 
     type Subscription {
+      #user
       userCreated: User!
       userUpdated: User!
       userDeleted: User!
+      #event
+      eventCreated: Event!
+      eventUpdated: Event!
+      eventDeleted: Event!
+      #location
+      locationCreated: Location!
+      locationUpdated: Location!
+      locationDeleted: Location!
+      #participant
+      participantCreated: Participant!
+      participantUpdated: Participant!
+      participantDeleted: Participant!
     }
 `;
 let globalCounter = 0;
@@ -160,6 +173,7 @@ const context = {
 
 const resolvers = {
   Subscription: {
+    //user
     userCreated: {
       subscribe: (_,__,{pubSub}) => {
         return pubSub.subscribe("userCreated");
@@ -174,7 +188,55 @@ const resolvers = {
       subscribe: (_,__,{pubSub}) => {
         return pubSub.subscribe("userDeleted");
       }
-    }
+    },
+    //event
+    eventCreated: {
+      subscribe: (_,__,{pubSub}) => {
+        return pubSub.subscribe("eventCreated");
+      }
+    },
+    eventUpdated: {
+      subscribe: (_,__,{pubSub}) => {
+        return pubSub.subscribe("eventUpdated");
+      }
+    },
+    eventDeleted: {
+      subscribe: (_,__,{pubSub}) => {
+        return pubSub.subscribe("eventDeleted");
+      }
+    },
+    //location
+    locationCreated: {
+      subscribe: (_,__,{pubSub}) => {
+        return pubSub.subscribe("locationCreated");
+      }
+    },
+    locationUpdated: {
+      subscribe: (_,__,{pubSub}) => {
+        return pubSub.subscribe("locationUpdated");
+      }
+    },
+    locationDeleted: {
+      subscribe: (_,__,{pubSub}) => {
+        return pubSub.subscribe("locationDeleted");
+      }
+    },
+    //participant
+    participantCreated: {
+      subscribe: (_,__,{pubSub}) => {
+        return pubSub.subscribe("participantCreated");
+      }
+    },
+    participantUpdated: {
+      subscribe: (_,__,{pubSub}) => {
+        return pubSub.subscribe("participantUpdated");
+      }
+    },
+    participantDeleted: {
+      subscribe: (_,__,{pubSub}) => {
+        return pubSub.subscribe("participantDeleted");
+      }
+    },
   },
   Mutation: {
     //user
@@ -214,15 +276,16 @@ const resolvers = {
         return { count };
     },
     //event
-    createEvent: (_, {data }) => {
+    createEvent: (_, {data }, {pubSub}) => {
       const event = {
         id: nanoid(),
         ...data,
       };
       events.push(event);
+      pubSub.publish("eventCreated", { eventCreated: event });
       return event;
     },
-    updateEvent: (_, {id, data}) => {
+    updateEvent: (_, {id, data}, {pubSub}) => {
       const eventIndex = events.findIndex((event) => event.id == id);
       if (eventIndex == -1) {
         return new Error("Event not found");
@@ -231,14 +294,16 @@ const resolvers = {
         ...events[eventIndex],
         ...data,
       };
+      pubSub.publish("eventUpdated", { eventUpdated: events[eventIndex] });
       return events[eventIndex];
     },
-    deleteEvent: (_, {id}) => {
+    deleteEvent: (_, {id}, {pubSub}) => {
         const eventIndex = events.findIndex((event) => event.id == id);
         if (eventIndex == -1) {
             return new Error("Event not found");
         }
         const deletedEvent = events.splice(eventIndex, 1);
+        pubSub.publish("eventDeleted", { eventDeleted: deletedEvent[0] });
         return deletedEvent[0];
     },
     deleteAllEvents: () => {
@@ -247,16 +312,17 @@ const resolvers = {
         return { count };
     },
     //location
-    createLocation: (_, {data}) => {
+    createLocation: (_, {data}, {pubSub}) => {
       const location = {
         id: nanoid(),
         ...data,
       };
 
       locations.push(location);
+      pubSub.publish("locationCreated", { locationCreated: location });
       return location;
     },
-    updateLocation: (_, {id, data}) => {
+    updateLocation: (_, {id, data}, {pubSub}) => {
         const locationIndex = locations.findIndex((location) => location.id == id);
         if (locationIndex == -1) {
             return new Error("Location not found");
@@ -265,14 +331,16 @@ const resolvers = {
             ...locations[locationIndex],
             ...data,
         };
+        pubSub.publish("locationUpdated", { locationUpdated: locations[locationIndex] });
         return locations[locationIndex];
     },
-    deleteLocation: (_, {id}) => {
+    deleteLocation: (_, {id}, {pubSub}) => {
         const locationIndex = locations.findIndex((location) => location.id == id);
         if (locationIndex == -1) {
             return new Error("Location not found");
         }
         const deletedLocation = locations.splice(locationIndex, 1);
+        pubSub.publish("locationDeleted", { locationDeleted: deletedLocation[0] });
         return deletedLocation[0];
     },
     deleteAllLocations: () => {
@@ -281,15 +349,16 @@ const resolvers = {
         return { count };
     },
     //participant
-    createParticipant: (_, {data}) => {
+    createParticipant: (_, {data}, {pubSub}) => {
       const participant = {
         id: nanoid(),
         ...data,
       };
       participants.push(participant);
+      pubSub.publish("participantCreated", { participantCreated: participant });
       return participant;
     },
-    updateParticipant: (_, {id, data}) => {
+    updateParticipant: (_, {id, data}, {pubSub}) => {
       const participantIndex = participants.findIndex((participant) => participant.id == id);
       if (participantIndex == -1) {
         return new Error("Participant not found");
@@ -298,14 +367,16 @@ const resolvers = {
         ...participants[participantIndex],
         ...data,
       };
+      pubSub.publish("participantUpdated", { participantUpdated: participants[participantIndex] });
       return participants[participantIndex];
     },
-    deleteParticipant: (_, {id}) => {
+    deleteParticipant: (_, {id}, {pubSub}) => {
       const participantIndex = participants.findIndex((participant) => participant.id == id);
       if (participantIndex == -1) {
         return new Error("Participant not found");
       }
       const deletedParticipant = participants.splice(participantIndex, 1);
+      pubSub.publish("participantDeleted", { participantDeleted: deletedParticipant[0] });
       return deletedParticipant[0];
     },
     deleteAllParticipants: () => {
