@@ -13,9 +13,13 @@ export const Query = {
     return user;
   },
   //event
-  events: (_,__, { db }) => db.events,
-  event: (_, args, { db }) => {
-    const event = db.events.find((event) => event.id == args.id);
+  events: async (_,__, { _db }) => {
+    const events = await _db.Event.find();
+    return events;
+  },
+  event: async (_, args, { _db }) => {
+    //const event = db.events.find((event) => event.id == args.id);
+    const event = _db.Event.findById(args.id);
     if (!event) {
       return new Error("Event not found");
     }

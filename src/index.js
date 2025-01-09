@@ -10,6 +10,7 @@ import db from './db';
 db();
 
 import User from './models/User';
+import Event from './models/Event';
 
 //fake data
 import data from './data.json';
@@ -19,6 +20,7 @@ const context = {
   db:data,
   _db:{
     User,
+    Event,
   }
 };
 
