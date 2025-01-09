@@ -12,6 +12,7 @@ db();
 import User from './models/User';
 import Event from './models/Event';
 import Location from './models/Location';
+import Participant from './models/Participant';
 
 //fake data
 import data from './data.json';
@@ -23,6 +24,7 @@ const context = {
     User,
     Event,
     Location,
+    Participant
   }
 };
 

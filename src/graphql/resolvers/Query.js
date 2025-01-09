@@ -39,11 +39,15 @@ export const Query = {
     return location;
   },
   //participant
-  participants: (_,__, { db }) => db.participants,
-  participant: (_, args, { db }) => {
-    const participant = db.participants.find(
+  participants: async (_,__, { _db }) => {
+    const participants = await _db.Participant.find();
+    return participants;
+  },
+  participant: async (_, args, { _db }) => {
+    /* const participant = db.participants.find(
       (participant) => participant.id == args.id
-    );
+    ); */
+    const participant = _db.Participant.findById(args.id);
     if (!participant) {
       return new Error("Participant not found");
     }
