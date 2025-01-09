@@ -9,12 +9,17 @@ import pubSub from './pubsub';
 import db from './db';
 db();
 
+import User from './models/User';
+
 //fake data
 import data from './data.json';
 
 const context = {
   pubSub,
-  data,
+  db:data,
+  _db:{
+    User,
+  }
 };
 
 const yoga = createYoga({

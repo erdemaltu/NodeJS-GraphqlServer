@@ -1,8 +1,12 @@
 export const Query = {
   //user
-  users: (_,__, { db }) => db.users,
-  user: (_, args, { db }) => {
-    const user = db.users.find((user) => user.id == args.id);
+  users: async (_,__, { _db }) => {
+    const users = await _db.User.find();
+    return users;
+  },
+  user: async (_, args, { _db }) => {
+    //const user = db.users.find((user) => user.id == args.id);
+    const user = _db.User.findById(args.id);
     if (!user) {
       return new Error("User not found");
     }
