@@ -6,11 +6,15 @@ import typeDefs from '@type-defs';
 
 import pubSub from './pubsub';
 
-import db from './data.json';
+import db from './db';
+db();
+
+//fake data
+import data from './data.json';
 
 const context = {
   pubSub,
-  db,
+  data,
 };
 
 const yoga = createYoga({
