@@ -39,40 +39,41 @@ export const Mutation = {
     return { count:deleteUsers.deletedCount, };
   },
   //event
-  createEvent: (_, { data }, { pubSub, db }) => {
-    const event = {
-      id: nanoid(),
+  createEvent: async (_, { data }, { pubSub, _db }) => {
+    const newEvent = new _db.Event({
       ...data,
-    };
-    db.events.push(event);
+    });
+
+    const event = await newEvent.save();
+
     pubSub.publish("eventCreated", { eventCreated: event });
     return event;
   },
-  updateEvent: (_, { id, data }, { pubSub, db }) => {
-    const eventIndex = db.events.findIndex((event) => event.id == id);
-    if (eventIndex == -1) {
+  updateEvent: async (_, { id, data }, { pubSub, _db }) => {
+    const is_event_exist = await _db.Event.findById(id);
+    if (!is_event_exist) {
       return new Error("Event not found");
     }
-    db.events[eventIndex] = {
-      ...db.events[eventIndex],
-      ...data,
-    };
-    pubSub.publish("eventUpdated", { eventUpdated: db.events[eventIndex] });
-    return db.events[eventIndex];
+    
+    const updatedEvent = await _db.Event.findByIdAndUpdate(id, data, {
+      new:true,
+    });
+
+    pubSub.publish("eventUpdated", { eventUpdated: updatedEvent });
+    return updatedEvent;
   },
-  deleteEvent: (_, { id }, { pubSub, db }) => {
-    const eventIndex = db.events.findIndex((event) => event.id == id);
-    if (eventIndex == -1) {
+  deleteEvent: async (_, { id }, { pubSub, _db }) => {
+    const is_event_exist = await _db.Event.findById(id);
+    if (!is_event_exist) {
       return new Error("Event not found");
     }
-    const deletedEvent = db.events.splice(eventIndex, 1);
-    pubSub.publish("eventDeleted", { eventDeleted: deletedEvent[0] });
-    return deletedEvent[0];
+    const deletedEvent = await _db.Event.findByIdAndDelete(id);
+    pubSub.publish("eventDeleted", { eventDeleted: deletedEvent });
+    return deletedEvent;
   },
-  deleteAllEvents: (_, __, { db }) => {
-    const count = db.events.length;
-    db.events.splice(0, db.events.length);
-    return { count };
+  deleteAllEvents: async (_, __, { _db }) => {
+    const deleteEvents = await _db.Event.deleteMany({});
+    return { count:deleteEvents.deletedCount, };
   },
   //location
   createLocation: (_, { data }, { pubSub, db }) => {
