@@ -129,47 +129,45 @@ export const Mutation = {
     return { count:deleteLocations.deletedCount };
   },
   //participant
-  createParticipant: async (_, { data }, { pubSub, db }) => {
-    const participant = {
-      id: nanoid(),
+  createParticipant: async (_, { data }, { pubSub, _db }) => {
+    const newParticipant = new _db.Participant({
       ...data,
-    };
-    db.participants.push(participant);
+    });
+
+    const participant = await newParticipant.save();
+
+    const event = await _db.Event.findById(new mongoose.Types.ObjectId(data.event));
+    event.participants.push(participant.id);
+    event.save();
+
     pubSub.publish("participantCreated", { participantCreated: participant });
+
     return participant;
   },
-  updateParticipant: async (_, { id, data }, { pubSub, db }) => {
-    const participantIndex = db.participants.findIndex(
-      (participant) => participant.id == id
-    );
-    if (participantIndex == -1) {
+  updateParticipant: async (_, { id, data }, { pubSub, _db }) => {
+    const is_participant_exist = await _db.Participant.findById(id);
+    if (!is_participant_exist) {
       return new Error("Participant not found");
     }
-    db.participants[participantIndex] = {
-      ...db.participants[participantIndex],
-      ...data,
-    };
-    pubSub.publish("participantUpdated", {
-      participantUpdated: db.participants[participantIndex],
+    
+    const updatedParticipant = await _db.Participant.findByIdAndUpdate(id, data, {
+      new:true,
     });
-    return db.participants[participantIndex];
+
+    pubSub.publish("participantUpdated", { participantUpdated: updatedParticipant });
+    return updatedParticipant;
   },
   deleteParticipant: async (_, { id }, { pubSub, db }) => {
-    const participantIndex = db.participants.findIndex(
-      (participant) => participant.id == id
-    );
-    if (participantIndex == -1) {
+    const is_participant_exist = await _db.Participant.findById(id);
+    if (!is_participant_exist) {
       return new Error("Participant not found");
     }
-    const deletedParticipant = db.participants.splice(participantIndex, 1);
-    pubSub.publish("participantDeleted", {
-      participantDeleted: deletedParticipant[0],
-    });
-    return deletedParticipant[0];
+    const deletedParticipant = await _db.Participant.findByIdAndDelete(id);
+    pubSub.publish("participantDeleted", { participantDeleted: deletedParticipant });
+    return deletedParticipant;
   },
   deleteAllParticipants: async (_, __, { db }) => {
-    const count = db.participants.length;
-    db.participants.splice(0, db.participants.length);
-    return { count };
+    const deleteParticipants = await _db.Participant.deleteMany({});
+    return { count:deleteParticipants.deletedCount };
   },
 };
