@@ -55,10 +55,7 @@ export const Mutation = {
     location.events.push(event.id);
     location.save();
 
-    const eventCount = await _db.Event.countDocuments();
-
     pubSub.publish("eventCreated", { eventCreated: event });
-    pubSub.publish("eventCount", { eventCount });
     return event;
   },
   updateEvent: async (_, { id, data }, { pubSub, _db }) => {
@@ -80,10 +77,8 @@ export const Mutation = {
       return new Error("Event not found");
     }
     const deletedEvent = await _db.Event.findByIdAndDelete(id);
-    const eventCount = await _db.Event.countDocuments();
 
     pubSub.publish("eventDeleted", { eventDeleted: deletedEvent });
-    pubSub.publish("eventCount", { eventCount });
 
     return deletedEvent;
   },

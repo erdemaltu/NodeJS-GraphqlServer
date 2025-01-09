@@ -21,7 +21,7 @@ type Subscription {
 
 #Location
 type Location {
-  id: ID!
+  _id: ID!
   name: String!
   desc: String!
   lat: String!

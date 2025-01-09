@@ -21,7 +21,7 @@ type Subscription {
 
 #User
 type User {
-  id: ID!
+  _id: ID!
   username: String!
   email: String!
   events: [Event!]!
