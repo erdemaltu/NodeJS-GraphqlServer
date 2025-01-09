@@ -26,9 +26,13 @@ export const Query = {
     return event;
   },
   //location
-  locations: (_,__, { db }) => db.locations,
-  location: (_, args, { db }) => {
-    const location = db.locations.find((location) => location.id == args.id);
+  locations: async (_,__, { _db }) => {
+    const locations = await _db.Location.find();
+    return locations;
+  },
+  location: async (_, args, { _db }) => {
+    //const location = db.locations.find((location) => location.id == args.id);
+    const location = _db.Location.findById(args.id);
     if (!location) {
       return new Error("Location not found");
     }
