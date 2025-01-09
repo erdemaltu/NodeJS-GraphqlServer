@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { nanoid } from "nanoid";
 
 export const Mutation = {
@@ -36,7 +37,7 @@ export const Mutation = {
   },
   deleteAllUsers: async (_, __, { _db }) => {
     const deleteUsers = await _db.User.deleteMany({});
-    return { count:deleteUsers.deletedCount, };
+    return { count:deleteUsers.deletedCount };
   },
   //event
   createEvent: async (_, { data }, { pubSub, _db }) => {
@@ -46,7 +47,18 @@ export const Mutation = {
 
     const event = await newEvent.save();
 
+    const user = await _db.User.findById(new mongoose.Types.ObjectId(data.user));
+    user.events.push(event.id);
+    user.save();
+
+    const location = await _db.Location.findById(new mongoose.Types.ObjectId(data.location));
+    location.events.push(event.id);
+    location.save();
+
+    const eventCount = await _db.Event.countDocuments();
+
     pubSub.publish("eventCreated", { eventCreated: event });
+    pubSub.publish("eventCount", { eventCount });
     return event;
   },
   updateEvent: async (_, { id, data }, { pubSub, _db }) => {
@@ -68,7 +80,11 @@ export const Mutation = {
       return new Error("Event not found");
     }
     const deletedEvent = await _db.Event.findByIdAndDelete(id);
+    const eventCount = await _db.Event.countDocuments();
+
     pubSub.publish("eventDeleted", { eventDeleted: deletedEvent });
+    pubSub.publish("eventCount", { eventCount });
+
     return deletedEvent;
   },
   deleteAllEvents: async (_, __, { _db }) => {
@@ -76,52 +92,44 @@ export const Mutation = {
     return { count:deleteEvents.deletedCount, };
   },
   //location
-  createLocation: (_, { data }, { pubSub, db }) => {
-    const location = {
-      id: nanoid(),
+  createLocation: async (_, { data }, { pubSub, _db }) => {
+    const newLocation = new _db.Location({
       ...data,
-    };
+    });
 
-    db.locations.push(location);
+    const location = await newLocation.save();
+
     pubSub.publish("locationCreated", { locationCreated: location });
     return location;
   },
-  updateLocation: (_, { id, data }, { pubSub, db }) => {
-    const locationIndex = db.locations.findIndex(
-      (location) => location.id == id
-    );
-    if (locationIndex == -1) {
+  updateLocation: async (_, { id, data }, { pubSub, _db }) => {
+    const is_location_exist = await _db.Location.findById(id);
+    if (!is_location_exist) {
       return new Error("Location not found");
     }
-    db.locations[locationIndex] = {
-      ...db.locations[locationIndex],
-      ...data,
-    };
-    pubSub.publish("locationUpdated", {
-      locationUpdated: db.locations[locationIndex],
+    
+    const updatedLocation = await _db.Location.findByIdAndUpdate(id, data, {
+      new:true,
     });
-    return db.locations[locationIndex];
+
+    pubSub.publish("locationUpdated", { locationUpdated: updatedLocation });
+    return updatedLocation;
   },
-  deleteLocation: (_, { id }, { pubSub, db }) => {
-    const locationIndex = db.locations.findIndex(
-      (location) => location.id == id
-    );
-    if (locationIndex == -1) {
+  deleteLocation: async (_, { id }, { pubSub, _db }) => {
+    const is_location_exist = await _db.Location.findById(id);
+    if (!is_location_exist) {
       return new Error("Location not found");
     }
-    const deletedLocation = db.locations.splice(locationIndex, 1);
-    pubSub.publish("locationDeleted", {
-      locationDeleted: deletedLocation[0],
-    });
-    return deletedLocation[0];
+    const deletedLocation = await _db.Location.findByIdAndDelete(id);
+    pubSub.publish("locationDeleted", { locationDeleted: deletedLocation });
+    return deletedLocation;
   },
-  deleteAllLocations: (_, __, { db }) => {
-    const count = db.locations.length;
-    db.locations.splice(0, db.locations.length);
-    return { count };
+  deleteAllLocations: async (_, __, { _db }) => {
+    const deleteLocations = await _db.Location.deleteMany({});
+    return { count:deleteLocations.deletedCount };
   },
   //participant
-  createParticipant: (_, { data }, { pubSub, db }) => {
+  createParticipant: async (_, { data }, { pubSub, db }) => {
     const participant = {
       id: nanoid(),
       ...data,
@@ -130,7 +138,7 @@ export const Mutation = {
     pubSub.publish("participantCreated", { participantCreated: participant });
     return participant;
   },
-  updateParticipant: (_, { id, data }, { pubSub, db }) => {
+  updateParticipant: async (_, { id, data }, { pubSub, db }) => {
     const participantIndex = db.participants.findIndex(
       (participant) => participant.id == id
     );
@@ -146,7 +154,7 @@ export const Mutation = {
     });
     return db.participants[participantIndex];
   },
-  deleteParticipant: (_, { id }, { pubSub, db }) => {
+  deleteParticipant: async (_, { id }, { pubSub, db }) => {
     const participantIndex = db.participants.findIndex(
       (participant) => participant.id == id
     );
@@ -159,7 +167,7 @@ export const Mutation = {
     });
     return deletedParticipant[0];
   },
-  deleteAllParticipants: (_, __, { db }) => {
+  deleteAllParticipants: async (_, __, { db }) => {
     const count = db.participants.length;
     db.participants.splice(0, db.participants.length);
     return { count };
