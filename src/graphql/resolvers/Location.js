@@ -4,4 +4,4 @@ const Location = {
   },
 };
 
-module.exports = Location;
+module.exports.Location = Location;

@@ -12,4 +12,4 @@ const Event = {
   },
 };
 
-module.exports = Event;
+module.exports.Event = Event;

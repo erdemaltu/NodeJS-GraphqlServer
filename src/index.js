@@ -1,16 +1,12 @@
 const { createServer } = require("node:http");
 const { createPubSub, createSchema, createYoga } = require("graphql-yoga");
 
-const resolvers = require('./graphql/resolvers')
+const resolvers = require("./graphql/resolvers");
+const typeDefs = require("./graphql/type-defs");
 
 const pubSub = require("./pubsub");
 
-
 const db = require("./data.json");
-
-const { readFileSync } = require("node:fs");
-const typeDefs = readFileSync(`${__dirname}/graphql/schema.graphql`, "utf8");
-let globalCounter = 0;
 
 const context = {
   pubSub,
