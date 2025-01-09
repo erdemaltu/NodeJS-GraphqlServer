@@ -1,41 +1,42 @@
-import { nanoid } from 'nanoid';
+import { nanoid } from "nanoid";
 
 export const Mutation = {
   //user
-  createUser: (_, { data }, { pubSub, db }) => {
-    const user = {
-      id: nanoid(),
+  createUser: async (_, { data }, { pubSub, _db }) => {
+    const newUser = new _db.User({
       ...data,
-    };
-    db.users.push(user);
+    });
+
+    const user = await newUser.save();
+
     pubSub.publish("userCreated", { userCreated: user });
     return user;
   },
-  updateUser: (_, { id, data }, { pubSub, db }) => {
-    const userIndex = db.users.findIndex((user) => user.id == id);
-    if (userIndex == -1) {
+  updateUser: async (_, { id, data }, { pubSub, _db }) => {
+    const is_user_exist = await _db.User.findById(id);
+    if (!is_user_exist) {
       return new Error("User not found");
     }
-    users[userIndex] = {
-      ...db.users[userIndex],
-      ...data,
-    };
-    pubSub.publish("userUpdated", { userUpdated: db.users[userIndex] });
-    return users[userIndex];
+    
+    const updatedUser = await _db.User.findByIdAndUpdate(id, data, {
+      new:true,
+    });
+
+    pubSub.publish("userUpdated", { userUpdated: updatedUser });
+    return updatedUser;
   },
-  deleteUser: (_, { id }, { pubSub, db }) => {
-    const userIndex = db.users.findIndex((user) => user.id == id);
-    if (userIndex == -1) {
+  deleteUser: async (_, { id }, { pubSub, _db }) => {
+    const is_user_exist = await _db.User.findById(id);
+    if (!is_user_exist) {
       return new Error("User not found");
     }
-    const deletedUser = db.users.splice(userIndex, 1);
-    pubSub.publish("userDeleted", { userDeleted: deletedUser[0] });
-    return deletedUser[0];
+    const deletedUser = await _db.User.findByIdAndDelete(id);
+    pubSub.publish("userDeleted", { userDeleted: deletedUser });
+    return deletedUser;
   },
-  deleteAllUsers: (_, __, { db }) => {
-    const count = db.users.length;
-    db.users.splice(0, db.users.length);
-    return { count };
+  deleteAllUsers: async (_, __, { _db }) => {
+    const deleteUsers = await _db.User.deleteMany({});
+    return { count:deleteUsers.deletedCount, };
   },
   //event
   createEvent: (_, { data }, { pubSub, db }) => {
@@ -85,7 +86,9 @@ export const Mutation = {
     return location;
   },
   updateLocation: (_, { id, data }, { pubSub, db }) => {
-    const locationIndex = db.locations.findIndex((location) => location.id == id);
+    const locationIndex = db.locations.findIndex(
+      (location) => location.id == id
+    );
     if (locationIndex == -1) {
       return new Error("Location not found");
     }
@@ -99,7 +102,9 @@ export const Mutation = {
     return db.locations[locationIndex];
   },
   deleteLocation: (_, { id }, { pubSub, db }) => {
-    const locationIndex = db.locations.findIndex((location) => location.id == id);
+    const locationIndex = db.locations.findIndex(
+      (location) => location.id == id
+    );
     if (locationIndex == -1) {
       return new Error("Location not found");
     }
