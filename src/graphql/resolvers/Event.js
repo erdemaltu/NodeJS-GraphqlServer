@@ -1,14 +1,6 @@
 export const Event = {
-  user: (parent, __, { db }) => {
-    return db.users.find((user) => user.id == parent.user_id);
-  },
-  location: (parent, __, { db }) => {
-    return db.locations.find((location) => location.id == parent.location_id);
-  },
-  participants: (parent, __, { db }) => {
-    return db.participants.filter(
-      (participant) => participant.event_id == parent.id
-    );
-  },
+  user: async (parent, __, { _db }) => await _db.User.findById(parent.user),
+  location: async (parent, __, { _db }) => await _db.Location.findById(parent.location),
+  participants: async (parent, __, { _db }) => await _db.Participant.find({event: parent.id})
 };
 

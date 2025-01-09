@@ -30,7 +30,6 @@ type Event {
   to: String!
   location_id: ID!
   location: Location!
-  user_id: ID!
   user: User!
   participants: [Participant!]!
 }

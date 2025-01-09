@@ -2,10 +2,16 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const ParticipantSchema = new Schema({
-    name: { type: String, required: true },
-    desc: { type: String, required: true },
-    lat: { type: String, required: true },
-    lng: { type: String, required: true }
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+  },
+  events: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Event",
+    },
+  ],
 });
 
-export default mongoose.model('Participant', ParticipantSchema);
+export default mongoose.model("Participant", ParticipantSchema);
