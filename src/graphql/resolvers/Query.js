@@ -1,4 +1,4 @@
-const Query = {
+export const Query = {
   //user
   users: (_,__, { db }) => db.users,
   user: (_, args, { db }) => {
@@ -38,5 +38,3 @@ const Query = {
     return participant;
   },
 };
-
-module.exports.Query = Query;

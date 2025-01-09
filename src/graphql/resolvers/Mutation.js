@@ -1,9 +1,6 @@
-let nanoid;
-import("nanoid").then((module) => {
-  nanoid = module.nanoid;
-});
+import { nanoid } from 'nanoid';
 
-const Mutation = {
+export const Mutation = {
   //user
   createUser: (_, { data }, { pubSub, db }) => {
     const user = {
@@ -162,5 +159,3 @@ const Mutation = {
     return { count };
   },
 };
-
-module.exports.Mutation = Mutation;

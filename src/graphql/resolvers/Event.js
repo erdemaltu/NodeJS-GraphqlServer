@@ -1,4 +1,4 @@
-const Event = {
+export const Event = {
   user: (parent, __, { db }) => {
     return db.users.find((user) => user.id == parent.user_id);
   },
@@ -12,4 +12,3 @@ const Event = {
   },
 };
 
-module.exports.Event = Event;

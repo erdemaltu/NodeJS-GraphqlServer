@@ -1,12 +1,12 @@
-const { createServer } = require("node:http");
-const { createPubSub, createSchema, createYoga } = require("graphql-yoga");
+import { createServer } from 'node:http';
+import { createSchema, createYoga } from 'graphql-yoga';
 
-const resolvers = require("./graphql/resolvers");
-const typeDefs = require("./graphql/type-defs");
+import resolvers from '@resolvers';
+import typeDefs from '@type-defs';
 
-const pubSub = require("./pubsub");
+import pubSub from './pubsub';
 
-const db = require("./data.json");
+import db from './data.json';
 
 const context = {
   pubSub,

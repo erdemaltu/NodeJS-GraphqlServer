@@ -1,4 +1,4 @@
-const Subscription = {
+export const Subscription = {
   //user
   userCreated: {
     subscribe: (_, __, { pubSub }) => {
@@ -64,5 +64,3 @@ const Subscription = {
     },
   },
 };
-
-module.exports.Subscription = Subscription;
